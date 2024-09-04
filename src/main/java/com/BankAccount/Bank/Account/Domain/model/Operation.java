@@ -3,6 +3,7 @@ package com.BankAccount.Bank.Account.Domain.model;
 import jakarta.persistence.*;
 
 import java.util.Date;
+import java.util.UUID;
 
 @Entity
 @Table(name = "operation")
@@ -11,10 +12,10 @@ public class Operation {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "SEQ")
     @SequenceGenerator(name = "SEQ", sequenceName = "livret_seq", allocationSize = 1)
-    public Long id;
+    private UUID id;
 
     @Column(name = "numerocompte")
-    public String numeroCompte;
+    private String numeroCompte;
 
     @Column(name = "dateoperation")
     private Date dateOperation;

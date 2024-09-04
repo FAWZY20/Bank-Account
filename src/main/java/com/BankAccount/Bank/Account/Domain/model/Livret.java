@@ -2,6 +2,8 @@ package com.BankAccount.Bank.Account.Domain.model;
 
 import jakarta.persistence.*;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "livret")
 public class Livret {
@@ -9,15 +11,15 @@ public class Livret {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "SEQ")
     @SequenceGenerator(name = "SEQ", sequenceName = "livret_seq", allocationSize = 1)
-    public Long id;
+    private UUID id;
 
     @Column(name = "numerocompte")
-    public String numeroCompte;
+    private String numeroCompte;
 
     @Column(name = "solde", columnDefinition = "0")
-    public int solde;
+    private int solde;
     @Column(name = "plafond", columnDefinition = "0")
-    public int plafond;
+    private int plafond;
 
     public Livret(String numeroCompte, int solde, int plafond) {
         this.numeroCompte = numeroCompte;

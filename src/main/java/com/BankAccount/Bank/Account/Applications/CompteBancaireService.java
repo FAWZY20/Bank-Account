@@ -7,6 +7,8 @@ import com.BankAccount.Bank.Account.Infrastructure.api.CompteBancaireControler;
 import com.BankAccount.Bank.Account.Infrastructure.persistence.CompteBancaireRepository;
 import com.BankAccount.Bank.Account.Infrastructure.persistence.DecouvertRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -30,24 +32,32 @@ public class CompteBancaireService implements CompteBancaireControler {
     CompteBancaire compteBancaire;
 
     @Override
-    public void ajoutCompte(CompteBancaire cpBancaire) {
-        Decouvert decouvert = new Decouvert();
-        String numeroCompte;
+    public ResponseEntity<Boolean> ajoutCompte(CompteBancaire cpBancaire) {
+        try {
+            Decouvert decouvert = new Decouvert();
+            String numeroCompte;
 
-        //Vérifiez si le numéro de compte est disponible, et si c'est le cas, faisons la boucle jusqu'à ce qu'il ne soit pas disponible.
-        do {
-            numeroCompte = genererNumeroCompte();
-        }while (compteBancaireRepository.findCompteBancaireByNumeroCompte(numeroCompte) != null);
+            //Vérifiez si le numéro de compte est disponible, et si c'est le cas, faisons la boucle jusqu'à ce qu'il ne soit pas disponible.
+            do {
+                numeroCompte = genererNumeroCompte();
+            }while (compteBancaireRepository.findCompteBancaireByNumeroCompte(numeroCompte) != null);
 
-        cpBancaire.setNumeroCompte(numeroCompte);
-        compteBancaireRepository.save(cpBancaire);
+            cpBancaire.setNumeroCompte(numeroCompte);
+            compteBancaireRepository.save(cpBancaire);
 
-        decouvert.setNumeroCompte(numeroCompte);
-        decouvertRepository.save(decouvert);
+            decouvert.setNumeroCompte(numeroCompte);
+            decouvertRepository.save(decouvert);
+
+            return new ResponseEntity<>(true, HttpStatus.OK);
+
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseEntity<>(false, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Override
-    public Boolean retrait(@RequestParam("numeroCompte") String numeroCompte,
+    public ResponseEntity<Boolean> retrait(@RequestParam("numeroCompte") String numeroCompte,
                            @RequestParam("argentRetrais") int argentRetrais){
         compteBancaire = compteBancaireRepository.findCompteBancaireByNumeroCompte(numeroCompte);
         Decouvert decouvert = decouvertRepository.findDecouvertByNumeroCompte(numeroCompte);
@@ -56,7 +66,7 @@ public class CompteBancaireService implements CompteBancaireControler {
             operationService.ajoutOperation(numeroCompte,argentRetrais, Operation.TypeOperation.RETRAIT, Operation.TypeCompte.COURANT);
             compteBancaire.setSolde(compteBancaire.getSolde() - argentRetrais);
             compteBancaireRepository.save(compteBancaire);
-            return true;
+            return new ResponseEntity<>(true, HttpStatus.OK);
         } else if (decouvert.getAutorisation() == true) {
             //quand il rest un peut d'argent dans le compte courant pour calculer le decouvert et le compte courant ce qu'il va y rester
             if ((decouvert.getSoldeDecouvert() + compteBancaire.getSolde()) >= argentRetrais){
@@ -67,7 +77,7 @@ public class CompteBancaireService implements CompteBancaireControler {
                 compteBancaireRepository.save(compteBancaire);
 
                 decouvertRepository.save(decouvert);
-                return true;
+                return new ResponseEntity<>(true, HttpStatus.OK);
             } else if (decouvert.getSoldeDecouvert() >= argentRetrais) {
                 //si le compte courant et a 0
                 operationService.ajoutOperation(numeroCompte,argentRetrais, Operation.TypeOperation.RETRAIT, Operation.TypeCompte.COURANT);
@@ -77,20 +87,28 @@ public class CompteBancaireService implements CompteBancaireControler {
                 compteBancaireRepository.save(compteBancaire);
 
                 decouvertRepository.save(decouvert);
-                return true;
+                return new ResponseEntity<>(true, HttpStatus.OK);
             }
         }
 
-        return false;
+        return new ResponseEntity<>(false, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @Override
-    public void depot(@RequestParam("numeroCompte") String numeroCompte,
+    public ResponseEntity<Boolean> depot(@RequestParam("numeroCompte") String numeroCompte,
                       @RequestParam("argentDeposer") int argentDeposer){
-        compteBancaire = compteBancaireRepository.findCompteBancaireByNumeroCompte(numeroCompte);
-        operationService.ajoutOperation(numeroCompte,argentDeposer, Operation.TypeOperation.DEPOT, Operation.TypeCompte.COURANT);
-        compteBancaire.setSolde(compteBancaire.getSolde() + argentDeposer);
-        compteBancaireRepository.save(compteBancaire);
+        try {
+            compteBancaire = compteBancaireRepository.findCompteBancaireByNumeroCompte(numeroCompte);
+            operationService.ajoutOperation(numeroCompte,argentDeposer, Operation.TypeOperation.DEPOT, Operation.TypeCompte.COURANT);
+            compteBancaire.setSolde(compteBancaire.getSolde() + argentDeposer);
+            compteBancaireRepository.save(compteBancaire);
+
+            return new ResponseEntity<>(true, HttpStatus.OK);
+        }catch (Exception e){
+            e.printStackTrace();
+
+            return new   ResponseEntity<>(false, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
 

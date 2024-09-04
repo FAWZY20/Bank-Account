@@ -9,6 +9,8 @@ import com.BankAccount.Bank.Account.Infrastructure.persistence.CompteBancaireRep
 import com.BankAccount.Bank.Account.Infrastructure.persistence.LivretRepository;
 import com.BankAccount.Bank.Account.Infrastructure.persistence.OperationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -28,7 +30,7 @@ public class ReleveService implements ReleveControler {
 
 
     @Override
-    public ReleveDTO getRelever(String nCompte, String typeCompte) {
+    public ResponseEntity<ReleveDTO> getRelever(String nCompte, String typeCompte) {
         LocalDate dateEmision = LocalDateTime.now().toLocalDate();
         LocalDate dateDebut = dateEmision.minusDays(30);
 
@@ -47,6 +49,6 @@ public class ReleveService implements ReleveControler {
         releveDTO.setTypeCompte(typeCompte.toUpperCase());
         releveDTO.setListOperation(operationRepository.findOperationForRelever(nCompte,typeCompte.toUpperCase(),dateDebut,dateEmision));
 
-        return releveDTO;
+        return new ResponseEntity<>(releveDTO, HttpStatus.OK);
     }
 }

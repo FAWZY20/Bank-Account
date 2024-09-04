@@ -2,6 +2,8 @@ package com.BankAccount.Bank.Account.Domain.model;
 
 import jakarta.persistence.*;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "decouvert")
 public class Decouvert {
@@ -10,16 +12,16 @@ public class Decouvert {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "SEQ")
     @SequenceGenerator(name = "SEQ", sequenceName = "decouvert_seq", allocationSize = 1)
-    public Long id;
+    private UUID id;
 
     @Column(name = "numerocompte")
-    public String numeroCompte;
+    private String numeroCompte;
 
     @Column(name = "autorisation")
-    public Boolean autorisation = false ;
+    private Boolean autorisation = false ;
 
     @Column(name = "soldedecouvert", columnDefinition = "0")
-    public int soldeDecouvert;
+    private int soldeDecouvert;
 
     public Decouvert(String numeroCompte, Boolean autorisation, int soldeDecouvert) {
         this.numeroCompte = numeroCompte;
